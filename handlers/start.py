@@ -6,6 +6,7 @@ start_router = Router()
 
 @start_router.message(CommandStart())
 async def cmd_start(message: Message):
+    user_id = message.from_user.id
     await message.answer('Запуск сообщения по команде /start используя фильтр CommandStart()')
 
 
