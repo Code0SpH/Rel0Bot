@@ -7,7 +7,7 @@ import create_bot
 
 start_router = Router()
 
-prices = [LabeledPrice(label='Доступ к боту', amount=50000)]  # 50000 = 500 рублей
+prices = [LabeledPrice(label='Доступ к боту', amount=50000)]
 
 #start
 async def process_start(message: types.Message):
@@ -16,7 +16,7 @@ async def process_start(message: types.Message):
              (USER_ID, DATE_PAYMENT_END, KEY)
              VALUES (?, NULL, NULL)
              ON CONFLICT (USER_ID) DO UPDATE
-             SET DATE_PAYMENT_END = excluded.                  KEY = excluded.KEY;'''
+             SET DATE_PAYMENT_END = excluded.KEY = excluded.KEY;'''
     conn = sqlite3.connect('main.db')
     cursor = conn.cursor()
     cursor.execute(sql, (user_id,))
@@ -39,15 +39,14 @@ async def process_pay_command(message: Message):
             chat_id=message.chat.id,
             title='Покупка доступа к боту',
             description='Оплата доступа к боту',
-            payload='invoice_payload',  # Убедись, что payload уникален для каждого платежа
-            provider_token=settings.PAYMENT_TOKEN,  # Проверка токена в settings
+            payload='invoice_payload',
+            provider_token=settings.PAYMENT_TOKEN,
             currency='RUB',
             prices=prices
         )
     except Exception as e:
         await message.answer(f"Произошла ошибка при обработке платежа: {str(e)}")
 
-# Установка команд для главного меню
 async def set_main_menu(bot):
     main_menu_commands = [
         BotCommand(command='/start', description='Начало'),
@@ -57,10 +56,8 @@ async def set_main_menu(bot):
     ]
     await bot.set_my_commands(main_menu_commands)
 
-# Функция для регистрации хэндлеров
 def register_handlers(dp: Dispatcher):
     dp.message.register(process_start, Command(commands=["start"]))
     dp.message.register(process_help_command, Command(commands=['help']))
     dp.message.register(process_support_command, Command(commands=['support']))
     dp.message.register(process_pay_command, Command(commands=['pay']))
-
