@@ -29,12 +29,12 @@ cursor.execute('''
                 ''')
 
 cursor.execute('''
-    CREATE TABLE sequence (
-        key_id INTEGER PRIMARY KEY AUTOINCREMENT
-    );
-''')
+                CREATE TABLE IF NOT EXISTS sequence (
+                key_id INTEGER PRIMARY KEY AUTOINCREMENT);
+                ''')
 
-cursor.execute(''' CREATE TRIGGER IF NOT EXISTS after_start AFTER INSERT ON users
+cursor.execute(''' 
+CREATE TRIGGER IF NOT EXISTS after_start AFTER INSERT ON users
 FOR EACH ROW
 WHEN (new.rowid IS NOT NULL AND new.rowid > 0)
 BEGIN
@@ -47,8 +47,7 @@ BEGIN
     VALUES ((SELECT key_token FROM key_base 
             WHERE key_token NOT IN (SELECT key_id FROM sequence) 
             ORDER BY RANDOM() LIMIT 1));
-END;
-''')
+END''')
 
 conn.commit()
 conn.close()
@@ -58,18 +57,4 @@ logger = logging.getLogger(__name__)
 
 bot = Bot(token=settings.TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=MemoryStorage())
-
-
-@dp.message()
-async def process_start(message: types.Message):
-    user_id = message.from_user.id
-    sql = '''INSERT INTO USERS
-                    (USER_ID, DATE_PAYMENT_END, KEY)
-                VALUES(?, NULL, NULL);'''
-    conn = sqlite3.connect('main.db')
-    cursor = conn.cursor()
-    cursor.execute(sql, (user_id,))
-    conn.commit()
-    conn.close()
-    await bot.send_message(chat_id=user_id, text='Привет! Вы начали работу с ботом.')
 
