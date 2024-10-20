@@ -63,3 +63,4 @@ def register_handlers(dp: Dispatcher):
     dp.message.register(process_help_command, Command(commands=['help']))
     dp.message.register(process_support_command, Command(commands=['support']))
     dp.message.register(process_pay_command, Command(commands=['pay']))
+
